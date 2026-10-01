@@ -1,6 +1,7 @@
-import { ArrowUpRight, CircleHelp } from 'lucide-react';
+import { ArrowUpRight, CircleHelp, TicketCheck } from 'lucide-react';
 import { useState } from 'react';
 import DiscoverPage from './pages/DiscoverPage.jsx';
+import RsvpPage from './pages/RsvpPage.jsx';
 import { AppDataProvider } from './state/AppDataProvider.jsx';
 import './App.css';
 
@@ -15,6 +16,7 @@ function XtrackApp() {
         </a>
         <nav className="primary-nav" aria-label="Main navigation">
           <button className={`nav-item${activePage === 'discover' ? ' is-active' : ''}`} type="button" onClick={() => setActivePage('discover')}>Discover</button>
+          <button className={`nav-item${activePage === 'going' ? ' is-active' : ''}`} type="button" onClick={() => setActivePage('going')}><TicketCheck size={14} /> Going</button>
         </nav>
         <div className="topbar-right">
           <span className="city-status"><i /> Your next plan starts here</span>
@@ -22,6 +24,7 @@ function XtrackApp() {
         </div>
       </header>
       {activePage === 'discover' && <DiscoverPage />}
+      {activePage === 'going' && <RsvpPage />}
       <footer className="app-footer"><span>GOOD PLANS, MADE TOGETHER.</span><a href="https://www.ticketmaster.com/" target="_blank" rel="noreferrer">Event listings by Ticketmaster <ArrowUpRight size={13} /></a></footer>
     </div>
   );

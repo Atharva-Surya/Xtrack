@@ -21,11 +21,15 @@ export function AppDataProvider({ children }) {
   const [calendar, setCalendar] = useState(null);
   const [total, setTotal] = useState(0);
   const [rsvps, setRsvps] = useState([]);
+  const [profile, setProfile] = useState({ userId, displayName: '', email: '' });
+  const [reminders, setReminders] = useState([]);
   const [eventsLoading, setEventsLoading] = useState(false);
   const [rsvpsLoading, setRsvpsLoading] = useState(true);
+  const [profileLoading, setProfileLoading] = useState(true);
   const [eventsError, setEventsError] = useState('');
   const [actionError, setActionError] = useState('');
   const [busyEventId, setBusyEventId] = useState('');
+  const [busyReminderEventId, setBusyReminderEventId] = useState('');
 
   useEffect(() => {
     const controller = new AbortController();
@@ -35,6 +39,23 @@ export function AppDataProvider({ children }) {
         if (error.name !== 'AbortError') setActionError(error.message);
       })
       .finally(() => setRsvpsLoading(false));
+    return () => controller.abort();
+  }, [userId]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    Promise.all([
+      request(`/users/${userId}`, { signal: controller.signal }),
+      request(`/users/${userId}/reminders`, { signal: controller.signal }),
+    ])
+      .then(([savedProfile, savedReminders]) => {
+        setProfile(savedProfile);
+        setReminders(savedReminders.reminders);
+      })
+      .catch((error) => {
+        if (error.name !== 'AbortError') setActionError(error.message);
+      })
+      .finally(() => setProfileLoading(false));
     return () => controller.abort();
   }, [userId]);
 
@@ -92,6 +113,40 @@ export function AppDataProvider({ children }) {
     }
   }
 
+  async function saveProfile(fields) {
+    try {
+      const savedProfile = await request(`/users/${userId}`, {
+        method: 'PUT',
+        body: JSON.stringify(fields),
+      });
+      setProfile(savedProfile);
+      setActionError('');
+      return true;
+    } catch (error) {
+      setActionError(error.message);
+      return false;
+    }
+  }
+
+  async function saveReminder(eventId, settings) {
+    setBusyReminderEventId(eventId);
+    setActionError('');
+    try {
+      const result = await request(`/users/${userId}/reminders/${encodeURIComponent(eventId)}`, {
+        method: 'PUT',
+        body: JSON.stringify(settings),
+      });
+      setReminders((current) => [
+        ...current.filter((reminder) => reminder.eventId !== eventId),
+        result.reminder,
+      ]);
+    } catch (error) {
+      setActionError(error.message);
+    } finally {
+      setBusyReminderEventId('');
+    }
+  }
+
   const value = {
     userId,
     city,
@@ -128,6 +183,12 @@ export function AppDataProvider({ children }) {
     total,
     rsvps,
     rsvpsLoading,
+    profile,
+    profileLoading,
+    saveProfile,
+    reminders,
+    saveReminder,
+    busyReminderEventId,
     eventsLoading,
     eventsError,
     actionError,

@@ -16,7 +16,10 @@ test('RSVPs and reminders enforce one record per user and event', () => {
 });
 
 test('profile and RSVP schemas validate required persisted fields', () => {
-  const validUser = new User({ userId: 'f35c1117-3a9f-4b50-8d9c-760132eadb9f' });
+  const validUser = new User({
+    userId: 'f35c1117-3a9f-4b50-8d9c-760132eadb9f',
+    email: 'person@example.com',
+  });
   const validRsvp = new RSVP({
     userId: validUser.userId,
     eventId: 'event-1',
@@ -27,6 +30,7 @@ test('profile and RSVP schemas validate required persisted fields', () => {
   });
 
   assert.equal(validUser.validateSync(), undefined);
+  assert.equal(validUser.email, 'person@example.com');
   assert.equal(validRsvp.validateSync(), undefined);
   assert.ok(new RSVP().validateSync().errors.eventId);
 });

@@ -1,8 +1,12 @@
 import { CalendarDays, MapPin, TicketCheck, Trash2 } from 'lucide-react';
+import ReminderControl from '../components/ReminderControl.jsx';
 import { useAppData } from '../state/useAppData.js';
 
 export default function RsvpPage() {
-  const { rsvps, rsvpsLoading, actionError, busyEventId, toggleRsvp } = useAppData();
+  const {
+    rsvps, rsvpsLoading, actionError, busyEventId, toggleRsvp,
+    reminders, saveReminder, busyReminderEventId,
+  } = useAppData();
 
   return (
     <main className="rsvp-page">
@@ -32,6 +36,11 @@ export default function RsvpPage() {
                 <span className="eyebrow">CONFIRMED ATTENDANCE</span>
                 <h2>{rsvp.eventTitle}</h2>
                 <p><MapPin size={14} />{rsvp.venue}</p>
+                <ReminderControl
+                  reminder={reminders.find((item) => item.eventId === rsvp.eventId)}
+                  busy={busyReminderEventId === rsvp.eventId}
+                  onSave={(settings) => saveReminder(rsvp.eventId, settings)}
+                />
               </div>
               <button
                 className="remove-rsvp"

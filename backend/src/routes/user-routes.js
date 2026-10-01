@@ -19,6 +19,7 @@ const eventParams = z.object({ userId, eventId });
 const profileSchema = z.object({
   body: z.object({
     displayName: z.string().trim().max(80).optional(),
+    email: z.string().trim().max(254).email().or(z.literal('')).optional(),
     city: z.string().trim().max(100).optional(),
     region: z.string().trim().max(100).optional(),
   }).strict().refine((profile) => Object.keys(profile).length > 0, 'Provide at least one profile field'),

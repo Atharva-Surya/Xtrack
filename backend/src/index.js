@@ -15,12 +15,13 @@ import userRoutes from './routes/user-routes.js';
 import { attachRealtime, setRealtimeServer } from './sockets/realtime.js';
 
 dotenv.config({ path: resolve(dirname(fileURLToPath(import.meta.url)), '../../.env') });
+const clientUrl = process.env.CLIENT_URL ?? process.env.CLIENT_ORIGIN ?? 'http://localhost:5173';
 
 const app = express();
 const httpServer = createServer(app);
 
 app.use(helmet());
-app.use(cors({ origin: process.env.CLIENT_ORIGIN ?? 'http://localhost:5173' }));
+app.use(cors({ origin: clientUrl }));
 app.use(express.json({ limit: '32kb' }));
 app.use('/api/events', eventRoutes);
 app.use('/api/share-links', shareLinkRoutes);
@@ -32,7 +33,6 @@ app.get('/api/health', (_request, response) => {
   response.json({ status: 'ok' });
 });
 
-const clientUrl = process.env.CLIENT_URL ?? process.env.CLIENT_ORIGIN ?? 'http://localhost:5173';
 setRealtimeServer(attachRealtime(httpServer, clientUrl));
 
 const port = Number(process.env.PORT) || 4000;

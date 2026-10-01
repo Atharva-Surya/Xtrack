@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { request } from '../services/api.js';
+import { realtimeSocket } from '../services/realtime.js';
 import { AppDataContext } from './app-data-context.js';
 
 function getUserId() {
@@ -32,6 +33,27 @@ export function AppDataProvider({ children }) {
   const [busyReminderEventId, setBusyReminderEventId] = useState('');
   const [sharingEventId, setSharingEventId] = useState('');
   const [shareCopiedEventId, setShareCopiedEventId] = useState('');
+  const [chatMessages, setChatMessages] = useState([]);
+  const [chatLoading, setChatLoading] = useState(false);
+
+  useEffect(() => {
+    function updateFriendsAttending(update) {
+      setEvents((current) => current.map((event) => (
+        event.id === update.eventId ? { ...event, friendsAttending: update.friendsAttending } : event
+      )));
+    }
+
+    realtimeSocket.on('friends-attending:update', updateFriendsAttending);
+    realtimeSocket.connect();
+    return () => {
+      realtimeSocket.off('friends-attending:update', updateFriendsAttending);
+      realtimeSocket.disconnect();
+    };
+  }, []);
+
+  useEffect(() => {
+    realtimeSocket.emit('events:join', events.map((event) => event.id));
+  }, [events]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -166,6 +188,22 @@ export function AppDataProvider({ children }) {
     }
   }
 
+  async function sendChatMessage(message) {
+    setChatMessages((current) => [...current, { role: 'user', text: message }]);
+    setChatLoading(true);
+    try {
+      const result = await request('/chat', {
+        method: 'POST',
+        body: JSON.stringify({ message, city }),
+      });
+      setChatMessages((current) => [...current, { role: 'assistant', ...result }]);
+    } catch (error) {
+      setChatMessages((current) => [...current, { role: 'assistant', reply: error.message, events: [] }]);
+    } finally {
+      setChatLoading(false);
+    }
+  }
+
   const value = {
     userId,
     city,
@@ -211,6 +249,9 @@ export function AppDataProvider({ children }) {
     sharingEventId,
     shareCopiedEventId,
     shareRsvp,
+    chatMessages,
+    chatLoading,
+    sendChatMessage,
     eventsLoading,
     eventsError,
     actionError,

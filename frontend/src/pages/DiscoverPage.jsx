@@ -1,5 +1,6 @@
 import { Search, X } from 'lucide-react';
 import Calendar from '../components/Calendar.jsx';
+import ChatPanel from '../components/ChatPanel.jsx';
 import EventCard from '../components/EventCard.jsx';
 import { useAppData } from '../state/useAppData.js';
 
@@ -9,6 +10,7 @@ export default function DiscoverPage() {
     setSelectedDate, events, calendar, total, rsvps, eventsLoading,
     eventsError, actionError, busyEventId, toggleRsvp,
     shareRsvp, sharingEventId, shareCopiedEventId,
+    chatMessages, chatLoading, sendChatMessage,
   } = useAppData();
 
   function handleSearch(event) {
@@ -86,6 +88,14 @@ export default function DiscoverPage() {
               ))}
             </div>
           )}
+          <ChatPanel
+            messages={chatMessages}
+            loading={chatLoading}
+            onSend={sendChatMessage}
+            rsvps={rsvps}
+            busyEventId={busyEventId}
+            onToggleRsvp={toggleRsvp}
+          />
         </section>
       </div>
     </main>

@@ -1,4 +1,5 @@
 import { createShareLink, recordInviteClick } from '../services/share-link-service.js';
+import { emitFriendsAttending } from '../sockets/realtime.js';
 
 export async function createLink(request, response, next) {
   try {
@@ -13,7 +14,9 @@ export async function openLink(request, response, next) {
   try {
     const { token } = request.validated.params;
     const { userId } = request.validated.query;
-    response.json(await recordInviteClick(token, userId));
+    const result = await recordInviteClick(token, userId);
+    emitFriendsAttending(result.event.id, result.friendsAttending);
+    response.json(result);
   } catch (error) {
     next(error);
   }

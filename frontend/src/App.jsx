@@ -2,6 +2,7 @@ import { ArrowUpRight, CircleHelp, TicketCheck, UserRound } from 'lucide-react';
 import { useState } from 'react';
 import ProfilePanel from './components/ProfilePanel.jsx';
 import DiscoverPage from './pages/DiscoverPage.jsx';
+import InviteLandingPage from './pages/InviteLandingPage.jsx';
 import RsvpPage from './pages/RsvpPage.jsx';
 import { AppDataProvider } from './state/AppDataProvider.jsx';
 import { useAppData } from './state/useAppData.js';
@@ -11,6 +12,7 @@ function XtrackApp() {
   const [activePage, setActivePage] = useState('discover');
   const [profileOpen, setProfileOpen] = useState(false);
   const { profile, profileLoading, actionError, saveProfile } = useAppData();
+  const inviteToken = new URLSearchParams(window.location.search).get('invite');
 
   return (
     <div className="app-shell">
@@ -28,8 +30,7 @@ function XtrackApp() {
           <a className="help-link" href="https://www.ticketmaster.com/" target="_blank" rel="noreferrer" aria-label="Ticketmaster"><CircleHelp size={17} /></a>
         </div>
       </header>
-      {activePage === 'discover' && <DiscoverPage />}
-      {activePage === 'going' && <RsvpPage />}
+      {inviteToken ? <InviteLandingPage token={inviteToken} /> : activePage === 'discover' ? <DiscoverPage /> : <RsvpPage />}
       <footer className="app-footer"><span>GOOD PLANS, MADE TOGETHER.</span><a href="https://www.ticketmaster.com/" target="_blank" rel="noreferrer">Event listings by Ticketmaster <ArrowUpRight size={13} /></a></footer>
       {profileOpen && <ProfilePanel profile={profile} profileLoading={profileLoading} error={actionError} onSave={saveProfile} onClose={() => setProfileOpen(false)} />}
     </div>

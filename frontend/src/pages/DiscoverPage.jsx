@@ -8,6 +8,7 @@ export default function DiscoverPage() {
     city, setCity, keyword, setKeyword, setMonth, selectedDate,
     setSelectedDate, events, calendar, total, rsvps, eventsLoading,
     eventsError, actionError, busyEventId, toggleRsvp,
+    shareRsvp, sharingEventId, shareCopiedEventId,
   } = useAppData();
 
   function handleSearch(event) {
@@ -78,6 +79,9 @@ export default function DiscoverPage() {
                   interested={rsvps.some((rsvp) => rsvp.eventId === event.id)}
                   busy={busyEventId === event.id}
                   onToggle={toggleRsvp}
+                  onShare={shareRsvp}
+                  sharing={sharingEventId === event.id}
+                  copied={shareCopiedEventId === event.id}
                 />
               ))}
             </div>

@@ -30,6 +30,8 @@ export function AppDataProvider({ children }) {
   const [actionError, setActionError] = useState('');
   const [busyEventId, setBusyEventId] = useState('');
   const [busyReminderEventId, setBusyReminderEventId] = useState('');
+  const [sharingEventId, setSharingEventId] = useState('');
+  const [shareCopiedEventId, setShareCopiedEventId] = useState('');
 
   useEffect(() => {
     const controller = new AbortController();
@@ -147,6 +149,23 @@ export function AppDataProvider({ children }) {
     }
   }
 
+  async function shareRsvp(eventId) {
+    setSharingEventId(eventId);
+    setActionError('');
+    try {
+      const result = await request('/share-links', {
+        method: 'POST',
+        body: JSON.stringify({ userId, eventId }),
+      });
+      await window.navigator.clipboard.writeText(result.shareUrl);
+      setShareCopiedEventId(eventId);
+    } catch (error) {
+      setActionError(error.message);
+    } finally {
+      setSharingEventId('');
+    }
+  }
+
   const value = {
     userId,
     city,
@@ -189,6 +208,9 @@ export function AppDataProvider({ children }) {
     reminders,
     saveReminder,
     busyReminderEventId,
+    sharingEventId,
+    shareCopiedEventId,
+    shareRsvp,
     eventsLoading,
     eventsError,
     actionError,

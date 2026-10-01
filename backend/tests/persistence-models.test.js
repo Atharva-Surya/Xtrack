@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { Reminder } from '../src/models/reminder.js';
 import { RSVP } from '../src/models/rsvp.js';
+import { InviteClick } from '../src/models/invite-click.js';
+import { ShareLink } from '../src/models/share-link.js';
 import { User } from '../src/models/user.js';
 
 function hasUniquePairIndex(model) {
@@ -33,4 +35,13 @@ test('profile and RSVP schemas validate required persisted fields', () => {
   assert.equal(validUser.email, 'person@example.com');
   assert.equal(validRsvp.validateSync(), undefined);
   assert.ok(new RSVP().validateSync().errors.eventId);
+});
+
+test('share links and invite clicks enforce the required unique indexes', () => {
+  assert.equal(ShareLink.schema.indexes().some(([keys, options]) => (
+    keys.creatorUserId === 1 && keys.eventId === 1 && options.unique === true
+  )), true);
+  assert.equal(InviteClick.schema.indexes().some(([keys, options]) => (
+    keys.token === 1 && keys.clickerUserId === 1 && options.unique === true
+  )), true);
 });

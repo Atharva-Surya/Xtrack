@@ -9,6 +9,8 @@ import { Server } from 'socket.io';
 import { connectDatabase } from './config/database.js';
 import { errorHandler } from './middleware/error-handler.js';
 import eventRoutes from './routes/event-routes.js';
+import shareLinkRoutes from './routes/share-link-routes.js';
+import shareRoutes from './routes/share-routes.js';
 import userRoutes from './routes/user-routes.js';
 
 dotenv.config({ path: resolve(dirname(fileURLToPath(import.meta.url)), '../../.env') });
@@ -20,6 +22,8 @@ app.use(helmet());
 app.use(cors({ origin: process.env.CLIENT_ORIGIN ?? 'http://localhost:5173' }));
 app.use(express.json({ limit: '32kb' }));
 app.use('/api/events', eventRoutes);
+app.use('/api/share-links', shareLinkRoutes);
+app.use('/api/share', shareRoutes);
 app.use('/api/users', userRoutes);
 
 app.get('/api/health', (_request, response) => {
